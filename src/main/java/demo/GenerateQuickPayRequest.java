@@ -6,8 +6,9 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
-public class GenerateQPReq implements QPRequest {
+public class GenerateQuickPayRequest implements QPRequest {
     private String version;
     private Timestamp timeStamp;
     private String merchantID;
@@ -17,8 +18,9 @@ public class GenerateQPReq implements QPRequest {
     private BigDecimal amount;
     private Timestamp expiry;
     private String userData1;
+    private String hashValue;
 
-    public GenerateQPReq() {
+    public GenerateQuickPayRequest() {
         version = "2.0";
         timeStamp = new Timestamp((new Date()).getTime());
         merchantID = "JT04";
@@ -38,8 +40,12 @@ public class GenerateQPReq implements QPRequest {
         this.version = version;
     }
 
-    public Timestamp getTimeStamp() {
-        return timeStamp;
+    public String getTimeStamp() {
+        if(timeStamp == null)
+            return "";
+
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH);
+        return df.format(timeStamp);
     }
 
     public void setTimeStamp(Timestamp timeStamp) {
@@ -78,8 +84,11 @@ public class GenerateQPReq implements QPRequest {
         this.currency = currency;
     }
 
-    public BigDecimal getAmount() {
-        return amount;
+    public String getAmount() {
+        if(amount == null)
+            return "0.00";
+
+        return amount.setScale(2,BigDecimal.ROUND_HALF_UP).toString();
     }
 
     public void setAmount(BigDecimal amount) {
@@ -87,7 +96,10 @@ public class GenerateQPReq implements QPRequest {
     }
 
     public String getExpiry() {
-    	SimpleDateFormat df = new SimpleDateFormat("ddMMyyyy");
+        if(expiry == null)
+            return "";
+
+    	SimpleDateFormat df = new SimpleDateFormat("ddMMyyyy", Locale.ENGLISH);
         return df.format(expiry);
     }
 
@@ -101,5 +113,25 @@ public class GenerateQPReq implements QPRequest {
 
     public void setUserData1(String userData1) {
         this.userData1 = userData1;
+    }
+
+    public String getHashValue() {
+        return hashValue;
+    }
+
+    public void setHashValue(String hashValue) {
+        this.hashValue = hashValue;
+    }
+
+    public String getMessage(){
+        return getVersion()
+                +getTimeStamp()
+                +getMerchantID()
+                +getOrderPrefix()
+                +getDescription()
+                +getCurrency()
+                +getAmount()
+                +getExpiry()
+                +getUserData1();
     }
 }
